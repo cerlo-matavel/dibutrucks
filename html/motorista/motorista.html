@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motorista Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      display: flex;
+    }
+    .form-container {
+        background-color: #fff;
+        padding: 56px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        width: 400px;
+        float: left;
+        margin-right: 18px;
+    }
+    .list-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      flex-grow: 1;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 16px;
+    }
+    input[type="submit"] {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 3px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    #data-table {
+      text-align: center;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    #data-table th, #data-table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: space-around;
+    }
+    .update-btn, .delete-btn {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      margin-left: 10px;
+      border-radius: 3px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Estilos para o modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%;
+    }
+
+    .close {
+      color: #888;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+      <h2>Motorista Form</h2>
+      <form id="motorista_form" action="#" method="post">
+        <div class="form-group">
+          <label for="mo_codigo">Código do Motorista:</label>
+          <input type="text" id="mo_codigo" name="mo_codigo" required>
+        </div>
+        <div class="form-group">
+          <label for="mo_nome">Nome do Motorista:</label>
+          <input type="text" id="mo_nome" name="mo_nome" required>
+        </div>
+        <div class="form-group">
+          <label for="mo_endereco">Endereço do Motorista:</label>
+          <input type="text" id="mo_endereco" name="mo_endereco" required>
+        </div>
+        <div class="form-group">
+          <label for="mo_experiencia">Experiência do Motorista:</label>
+          <input type="text" id="mo_experiencia" name="mo_experiencia" required>
+        </div>
+        <input type="submit" value="Gravar">
+      </form>
+    </div>
+    <div class="list-container">
+      <table id="motorista_data-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Endereço</th>
+            <th>Experiência</th>
+            <th>Ac&ccedil;&otilde;es</th>
+          </tr>
+        </thead>
+        <tbody id="motorista_data-list">
+          <!-- Records will be displayed here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal para edição de registro -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2>Editar Motorista</h2>
+      <form id="editForm">
+        <input type="hidden" id="mo_index" name="mo_index">
+        <div class="form-group">
+          <label for="mo_nome_edit">Novo Nome:</label>
+          <input type="text" id="mo_nome_edit" name="mo_nome_edit" required>
+        </div>
+        <div class="form-group">
+          <label for="mo_endereco_edit">Nova Morada:</label>
+          <input type="text" id="mo_endereco_edit" name="mo_endereco_edit" required>
+        </div>
+        <div class="form-group">
+          <label for="mo_experiencia_edit">Nova Experiência:</label>
+          <input type="text" id="mo_experiencia_edit" name="mo_experiencia_edit" required>
+        </div>
+        <input type="submit" value="Atualizar">
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const motorista_form = document.getElementById("motorista_form");
+      const motorista_dataList = document.getElementById("motorista_data-list");
+      const motorista_data = [];
+
+      motorista_form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const moCodigo = document.getElementById("mo_codigo").value;
+        const moNome = document.getElementById("mo_nome").value;
+        const moEndereco = document.getElementById("mo_endereco").value;
+        const moExperiencia = document.getElementById("mo_experiencia").value;
+
+        if (moCodigo && moNome && moEndereco && moExperiencia) {
+          if (isMotoristaCodeExists(moCodigo)) {
+            alert("O motorista já existe!");
+          } else {
+            motorista_data.push({ codigo: moCodigo, nome: moNome, endereco: moEndereco, experiencia: moExperiencia });
+            displayData();
+            motorista_form.reset();
+          }
+        }
+      });
+
+      function displayData() {
+        motorista_dataList.innerHTML = "";
+        motorista_data.forEach((item, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.codigo}</td>
+            <td>${item.nome}</td>
+            <td>${item.endereco}</td>
+            <td>${item.experiencia}</td>
+            <td class="btn-container">
+              <button class="update-btn" data-index="${index}">Atualizar</button>
+              <button class="delete-btn" data-index="${index}">Apagar</button>
+            </td>
+          `;
+          motorista_dataList.appendChild(row);
+        });
+      }
+
+      // Verifica se o código do motorista já existe
+      function isMotoristaCodeExists(code) {
+        return motorista_data.some((item) => item.codigo === code);
+      }
+
+      // Evento de clique na tabela
+      motorista_dataList.addEventListener("click", function (event) {
+        if (event.target.classList.contains("delete-btn")) {
+          const index = event.target.getAttribute("data-index");
+          motorista_data.splice(index, 1);
+          displayData();
+        }
+        if (event.target.classList.contains("update-btn")) {
+          const index = event.target.getAttribute("data-index");
+          openEditModal(index);
+        }
+      });
+
+      // Evento para abrir o modal de edição
+      function openEditModal(index) {
+        const record = motorista_data[index];
+        document.getElementById("mo_nome_edit").value = record.nome;
+        document.getElementById("mo_endereco_edit").value = record.endereco;
+        document.getElementById("mo_experiencia_edit").value = record.experiencia;
+        document.getElementById("mo_index").value = index;
+        editModal.style.display = "block";
+      }
+
+      // Evento para fechar o modal de edição
+      closeModal.addEventListener("click", function () {
+        editModal.style.display = "none";
+      });
+
+      // Evento de envio do formulário de edição
+      editForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const index = document.getElementById("mo_index").value;
+        motorista_data[index].nome = document.getElementById("mo_nome_edit").value;
+        motorista_data[index].endereco = document.getElementById("mo_endereco_edit").value;
+        motorista_data[index].experiencia = document.getElementById("mo_experiencia_edit").value;
+        displayData();
+        editModal.style.display = "none";
+      });
+    });
+  </script>
+</body>
+</html>

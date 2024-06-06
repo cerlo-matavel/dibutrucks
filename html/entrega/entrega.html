@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrega Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      display: flex;
+    }
+    .form-container {
+        background-color: #fff;
+        padding: 56px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        width: 400px;
+        float: left;
+        margin-right: 18px;
+    }
+    .list-container {
+      background-color: #fff;
+      padding: 10%;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      flex-grow: 1;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input[type="text"], input[type="date"], input[type="datetime-local"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 16px;
+    }
+    input[type="submit"] {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 3px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    #data-table {
+      text-align: center;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    #data-table th, #data-table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: space-around;
+    }
+    .update-btn, .delete-btn {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      margin-left: 10px;
+      border-radius: 3px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-container">
+      <h2>Entrega Form</h2>
+      <form id="entrega_form" action="#" method="post">
+        <div class="form-group">
+          <label for="ent_codigo">Código da Entrega:</label>
+          <input type="text" id="ent_codigo" name="ent_codigo" required>
+        </div>
+        <div class="form-group">
+          <label for="ent_custo">Custo da Entrega:</label>
+          <input type="text" id="ent_custo" name="ent_custo" required>
+        </div>
+        <div class="form-group">
+          <label for="ent_distancia">Distância da Entrega:</label>
+          <input type="text" id="ent_distancia" name="ent_distancia" required>
+        </div>
+        <div class="form-group">
+          <label for="ent_horario">Horário da Entrega:</label>
+          <input type="datetime-local" id="ent_horario" name="ent_horario" required>
+        </div>
+        <div class="form-group">
+          <label for="ent_prazo">Prazo da Entrega:</label>
+          <input type="date" id="ent_prazo" name="ent_prazo" required>
+        </div>
+        <input type="submit" value="Gravar">
+      </form>
+    </div>
+    <div class="list-container">
+      <table id="entrega_data-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Custo</th>
+            <th>Distância</th>
+            <th>Horário</th>
+            <th>Prazo</th>
+            <th>Ac&ccedil;&otilde;es</th>
+          </tr>
+        </thead>
+        <tbody id="entrega_data-list">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="update-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Atualizar Entrega</h3>
+      <form id="update-form">
+        <div class="form-group">
+          <label for="update_custo">Novo Custo:</label>
+          <input type="text" id="update_custo" name="update_custo" required>
+        </div>
+        <div class="form-group">
+          <label for="update_distancia">Nova Distância:</label>
+          <input type="text" id="update_distancia" name="update_distancia" required>
+        </div>
+        <div class="form-group">
+          <label for="update_horario">Novo Horário:</label>
+          <input type="datetime-local" id="update_horario" name="update_horario" required>
+        </div>
+        <div class="form-group">
+          <label for="update_prazo">Novo Prazo:</label>
+          <input type="date" id="update_prazo" name="update_prazo" required>
+        </div>
+        <input type="submit" value="Atualizar">
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const entrega_form = document.getElementById("entrega_form");
+      const entrega_dataList = document.getElementById("entrega_data-list");
+      const entrega_data = [];
+      const updateModal = document.getElementById("update-modal");
+      const updateForm = document.getElementById("update-form");
+
+      entrega_form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const entCodigo = document.getElementById("ent_codigo").value;
+        const entCusto = document.getElementById("ent_custo").value;
+        const entDistancia = document.getElementById("ent_distancia").value;
+        const entHorario = document.getElementById("ent_horario").value;
+        const entPrazo = document.getElementById("ent_prazo").value;
+
+        if (entCodigo && entCusto && entDistancia && entHorario && entPrazo) {
+          if (!isCodigoExists(entCodigo)) {
+            entrega_data.push({ codigo: entCodigo, custo: entCusto, distancia: entDistancia, horario: entHorario, prazo: entPrazo });
+            displayData();
+            entrega_form.reset();
+          } else {
+            alert("Código da entrega já existe!");
+          }
+        }
+      });
+
+      function displayData() {
+        entrega_dataList.innerHTML = "";
+        entrega_data.forEach((item, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.codigo}</td>
+            <td>${item.custo}</td>
+            <td>${item.distancia}</td>
+            <td>${item.horario}</td>
+            <td>${item.prazo}</td>
+            <td class="btn-container">
+              <button class="update-btn" data-index="${index}">Atualizar</button>
+              <button class="delete-btn" data-index="${index}">Apagar</button>
+            </td>
+          `;
+          entrega_dataList.appendChild(row);
+        });
+
+        addUpdateDeleteListeners();
+      }
+
+      function isCodigoExists(code) {
+        return entrega_data.some((item) => item.codigo === code);
+      }
+
+      function addUpdateDeleteListeners() {
+        const updateButtons = document.querySelectorAll(".update-btn");
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+
+        updateButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const index = this.getAttribute("data-index");
+            openUpdateModal(index);
+          });
+        });
+
+        deleteButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const index = this.getAttribute("data-index");
+            deleteEntrega(index);
+          });
+        });
+      }
+
+      function openUpdateModal(index) {
+        const entrega = entrega_data[index];
+        document.getElementById("update_custo").value = entrega.custo;
+        document.getElementById("update_distancia").value = entrega.distancia;
+        document.getElementById("update_horario").value = entrega.horario;
+        document.getElementById("update_prazo").value = entrega.prazo;
+        updateModal.style.display = "block";
+
+        updateForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          const newCusto = document.getElementById("update_custo").value;
+          const newDistancia = document.getElementById("update_distancia").value;
+          const newHorario = document.getElementById("update_horario").value;
+          const newPrazo = document.getElementById("update_prazo").value;
+
+          entrega_data[index] = {
+            ...entrega_data[index],
+            custo: newCusto,
+            distancia: newDistancia,
+            horario: newHorario,
+            prazo: newPrazo,
+          };
+
+          displayData();
+          updateModal.style.display = "none";
+        });
+
+        const closeBtn = document.querySelector(".close");
+        closeBtn.addEventListener("click", function () {
+          updateModal.style.display = "none";
+        });
+      }
+
+      function deleteEntrega(index) {
+        entrega_data.splice(index, 1);
+        displayData();
+      }
+    });
+  </script>
+</body>
+</html>
